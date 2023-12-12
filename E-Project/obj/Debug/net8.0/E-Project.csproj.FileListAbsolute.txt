@@ -136,3 +136,4 @@ D:\Faraz\source\repos\E-Project\E-Project\obj\Debug\net8.0\refint\E-Project.dll
 D:\Faraz\source\repos\E-Project\E-Project\obj\Debug\net8.0\E-Project.pdb
 D:\Faraz\source\repos\E-Project\E-Project\obj\Debug\net8.0\E-Project.genruntimeconfig.cache
 D:\Faraz\source\repos\E-Project\E-Project\obj\Debug\net8.0\ref\E-Project.dll
+D:\Faraz\source\repos\E-Project\E-Project\obj\Debug\net8.0\E-Project.sourcelink.json
