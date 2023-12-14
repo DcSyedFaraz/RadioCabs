@@ -1,4 +1,5 @@
-﻿using E_Project.Models;
+﻿using Azure;
+using E_Project.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -39,23 +40,30 @@ namespace E_Project.Controllers
                 Email = model.EmailAddress,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.UserName,
-                PasswordHash = model.Password
+                //PasswordHash = model.Password
             };
 
-            var result = await userManager.CreateAsync(user);
+            var result = await userManager.CreateAsync(user, model.Password);
 
-            if(!result.Succeeded)
+            if (!result.Succeeded)
             {
+                foreach (var error in result.Errors)
+                {
+                    // Log the details of the error
+                    Console.WriteLine($"Error: {error.Code}, Description: {error.Description}");
+                }
+                var errorsAsString = string.Join("; ", result.Errors.Select(error => $"{error.Code}: {error.Description}"));
+
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Responce { Status = "Error", Message = "User Creation Failed!" });
+                    value: new Responce { Status = "Error", Message = errorsAsString });
             }
 
             if (await roleManager.RoleExistsAsync(UserRoles.User))
-                    {
-                        await userManager.AddToRoleAsync(user, UserRoles.User);
-                    }
+            {
+                await userManager.AddToRoleAsync(user, UserRoles.User);
+            }
 
-                return Ok(new Responce { Status = "200", Message = "User Created Successfully!" });
+            return Ok(new Responce { Status = "200", Message = "User Created Successfully!" });
         }
 
         //[HttpPost]
@@ -110,49 +118,88 @@ namespace E_Project.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await userManager.FindByNameAsync(model.UserName);
-
             var checkpass = await userManager.CheckPasswordAsync(user, model.Password);
 
-            if (user != null && checkpass != true )
+            //if (user != null && model.Password == user.PasswordHash)
+            if (user != null && checkpass)
             {
-                var userRole = await userManager.GetRolesAsync(user);
+                var userRoles = await userManager.GetRolesAsync(user);
 
-                var authclaims = new List<Claim>()
+                var authClaims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
+                     new Claim(ClaimTypes.Name, user.UserName),
+                     new Claim(ClaimTypes.NameIdentifier, user.Id),
+
                     new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+
                 };
-                foreach(var userR in userRole)
-                {
-                    authclaims.Add(new Claim(ClaimTypes.Role, userR));
-                }
-                var authSigninkey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes
-                    (configuration["JWT:Secret"]));
+
+                authClaims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
                 var token = new JwtSecurityToken(
                     issuer: configuration["JWT:ValidIssuer"],
                     audience: configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddDays(1),
-                    claims: authclaims,
-                    signingCredentials: new SigningCredentials(authSigninkey, SecurityAlgorithms.HmacSha256
-                    ));
-             return Ok(
-                new
+                    expires: DateTime.UtcNow.AddHours(1), // Adjust token expiration as needed
+                    claims: authClaims,
+                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                );
+
+                return Ok(new
                 {
                     Token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo,
-                    userRoles = userRole
-                }
-                );
+                    Expiration = token.ValidTo,
+                    UserRoles = userRoles
+                });
             }
-            return Unauthorized(
-                new Responce
-                {
-                    Status = user.ToString(),
-                    Message = checkpass.ToString()
-                }
-                );
+
+            // Delay the response to mitigate timing attacks
+            await Task.Delay(2000);
+
+            return Unauthorized(new Responce
+            {
+                Status = "Error",
+                Message = "Invalid username or password"
+            });
+
         }
+
+        [HttpDelete("delete-user/{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            try
+            {
+                // Find the user by its Id
+                var user = await userManager.FindByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                // Remove the user from the Identity system
+                var result = await userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return Ok(new { Message = "User deleted successfully!" });
+                }
+                else
+                {
+                    // If there are errors, log them or return an appropriate response
+                    var errors = result.Errors.Select(error => $"{error.Code}: {error.Description}");
+                    return StatusCode(500, new { Message = "Error deleting user.", Errors = errors });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception...
+                return StatusCode(500, new { Message = "Internal server error." });
+            }
+        }
+
+
     }
 
 }
