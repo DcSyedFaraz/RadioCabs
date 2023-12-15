@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E_Project.Models
 {
@@ -6,6 +7,7 @@ namespace E_Project.Models
     {
         [Key]
         public int Id { get; set; }
+        public string? UserId { get; set; }
         public string? Name { get; set; }
         public string? ContactPerson { get; set; }
         public string? Address { get; set; }
@@ -16,7 +18,8 @@ namespace E_Project.Models
         public int Experience { get; set; }
         public string? Description { get; set; }
         public PaymentType PaymentType { get; set; }
-        // Add other properties as needed
+        [ForeignKey("UserId")]
+        public ApplicationUser? User { get; set; }
     }
 
 }

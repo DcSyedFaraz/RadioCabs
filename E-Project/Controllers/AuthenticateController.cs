@@ -1,8 +1,6 @@
-﻿using Azure;
-using E_Project.Models;
+﻿using E_Project.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -141,7 +139,7 @@ namespace E_Project.Controllers
                 var token = new JwtSecurityToken(
                     issuer: configuration["JWT:ValidIssuer"],
                     audience: configuration["JWT:ValidAudience"],
-                    expires: DateTime.UtcNow.AddHours(1), // Adjust token expiration as needed
+                    expires: DateTime.UtcNow.AddHours(24), // Adjust token expiration as needed
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );

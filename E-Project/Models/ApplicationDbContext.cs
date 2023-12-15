@@ -20,6 +20,13 @@ namespace E_Project.Models
             .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_Advertisement_User");
+            
+            modelBuilder.Entity<Driver>()
+            .HasOne(a => a.User)
+            .WithMany(u => u.Drivers)
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_Driver_User");
 
             modelBuilder.Entity<Company>()
            .HasOne(c => c.User)

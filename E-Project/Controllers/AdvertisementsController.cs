@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using E_Project.Models;
-using System.Security.Claims;
+﻿using E_Project.Models;
 using Microsoft.AspNetCore.Authorization;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace E_Project.Controllers
 {
+    // [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AdvertisementsController : ControllerBase
