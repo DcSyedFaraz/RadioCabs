@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace E_Project.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AdvertisementsController : ControllerBase
@@ -48,7 +48,6 @@ namespace E_Project.Controllers
         }
 
         // PUT: api/Advertisements/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAdvertisement(int id, Advertisement advertisement)
         {
@@ -75,11 +74,14 @@ namespace E_Project.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new Responce
+            {
+                Status = "Success",
+                Message = "Successfully Updated Advertisement's Data"
+            }); 
         }
 
         // POST: api/Advertisements
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
         [HttpPost]
         public async Task<ActionResult<Advertisement>> PostAdvertisement(Advertisement advertisement)
@@ -91,7 +93,11 @@ namespace E_Project.Controllers
             _context.Advertisements.Add(advertisement);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAdvertisement", new { id = advertisement.Id }, advertisement);
+            return Ok(new Responce
+            {
+                Status = "Success",
+                Message = "Successfully Created Advertisement"
+            });
         }
 
         private ActionResult<Advertisement> OK(string? userId)
@@ -112,7 +118,11 @@ namespace E_Project.Controllers
             _context.Advertisements.Remove(advertisement);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new Responce
+            {
+                Status = "Success",
+                Message = "Successfully Deleted Advertisement's Data"
+            });
         }
 
         private bool AdvertisementExists(int id)

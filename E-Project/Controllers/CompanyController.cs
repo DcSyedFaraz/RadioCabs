@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace E_Project.Controllers
 {
-    [Authorize]
+    
     [ApiController]
     [Route("api/[controller]")]
     public class CompanyController : Controller
@@ -39,8 +39,27 @@ namespace E_Project.Controllers
             return Ok(jsonString);
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Company>> GetCompany(int id)
+        {
+            var companies = await _context.Companies.Include(a => a.User).FirstOrDefaultAsync(a => a.Id == id);
+
+            if (companies == null)
+            {
+                return NotFound();
+            }
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            };
+
+            var jsonString = JsonSerializer.Serialize(companies, options);
+
+            return Ok(jsonString);
+        }
+
         [HttpPost("register-company")]
-        public async Task<IActionResult> RegisterCompany([FromBody] Company company)
+        public async Task<IActionResult> RegisterCompany([FromBody] Company? company)
         {
             if (ModelState.IsValid)
             {
@@ -64,7 +83,8 @@ namespace E_Project.Controllers
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(newUser, UserRoles.User);
+                    await userManager.AddToRoleAsync(newUser, UserRoles.Company);
+                  
 
                     company.UserId = newUser.Id;
                     await _context.SaveChangesAsync();
@@ -84,7 +104,38 @@ namespace E_Project.Controllers
             return BadRequest(new { Message = "Invalid model state." });
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCompany(int id, Company company)
+        {
+            if (id != company.Id)
+            {
+                return BadRequest();
+            }
 
+            _context.Entry(company).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CompanyExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(new Responce
+            {
+                Status = "Success",
+                Message = "Successfully Updated Company's Data"
+            });
+        }
 
         [HttpDelete("delete-company/{companyId}")]
         public async Task<IActionResult> DeleteCompany(int companyId)
@@ -118,7 +169,10 @@ namespace E_Project.Controllers
             //}
         }
 
-
+        private bool CompanyExists(int id)
+        {
+            return _context.Companies.Any(e => e.Id == id);
+        }
 
 
     }

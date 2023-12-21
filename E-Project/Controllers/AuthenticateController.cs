@@ -100,6 +100,8 @@ namespace E_Project.Controllers
 
         //    if (!await roleManager.RoleExistsAsync(UserRoles.User))
         //        await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+        //if (!await roleManager.RoleExistsAsync(UserRoles.Company))
+        //               await roleManager.CreateAsync(new IdentityRole(UserRoles.Company));
 
         //    if (await roleManager.RoleExistsAsync(UserRoles.Admin))
         //    {
@@ -118,10 +120,12 @@ namespace E_Project.Controllers
             var user = await userManager.FindByNameAsync(model.UserName);
             var checkpass = await userManager.CheckPasswordAsync(user, model.Password);
 
-            //if (user != null && model.Password == user.PasswordHash)
-            if (user != null && checkpass)
+            
+                //if (user != null && model.Password == user.PasswordHash)
+                if (user != null && checkpass)
             {
-                var userRoles = await userManager.GetRolesAsync(user);
+                
+                    var userRoles = await userManager.GetRolesAsync(user);
 
                 var authClaims = new List<Claim>
                 {

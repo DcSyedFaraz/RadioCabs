@@ -40,7 +40,16 @@ namespace E_Project.Controllers
             }
             else
             {
-                return Ok("done"); // Use double quotes for string literals
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var driver = await _context.Drivers.Where(d => d.UserId == userId).Include(a => a.User).ToListAsync();
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                };
+
+                var jsonString = JsonSerializer.Serialize(driver, options);
+
+                return Ok(jsonString);
             }
         }
 
@@ -67,7 +76,6 @@ namespace E_Project.Controllers
         }
 
         // PUT: api/Drivers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
@@ -97,12 +105,11 @@ namespace E_Project.Controllers
             return Ok(new Responce
             {
                 Status = "Success",
-                Message = "SUccessfully Updated Driver's Data"
-            }); ;
+                Message = "Successfully Updated Driver's Data"
+            }); 
         }
 
         // POST: api/Drivers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
         [HttpPost]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
@@ -114,7 +121,12 @@ namespace E_Project.Controllers
             _context.Drivers.Add(driver);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDriver", new { id = driver.Id }, driver);
+            // return CreatedAtAction("GetDriver", new { id = driver.Id }, driver);
+            return Ok(new Responce
+            {
+                Status = "Success",
+                Message = "Successfully Created Driver's Data"
+            });
         }
 
         // DELETE: api/Drivers/5
@@ -133,7 +145,7 @@ namespace E_Project.Controllers
             return Ok(new Responce
             {
                 Status = "Success",
-                Message = "SUccessfully Deleted Driver's Data"
+                Message = "Successfully Deleted Driver's Data"
             });
         }
 
