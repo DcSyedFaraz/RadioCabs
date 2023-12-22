@@ -24,7 +24,15 @@ namespace E_Project.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Advertisement>>> GetAdvertisement()
         {
-            return await _context.Advertisements.ToListAsync();
+            var advertisement = await _context.Advertisements.Include(a => a.User).ToListAsync();
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            };
+
+            var jsonString = JsonSerializer.Serialize(advertisement, options);
+
+            return Ok(jsonString);
         }
 
         // GET: api/Advertisements/5
@@ -84,8 +92,9 @@ namespace E_Project.Controllers
         // POST: api/Advertisements
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Advertisement>> PostAdvertisement(Advertisement advertisement)
+        public async Task<ActionResult<Advertisement>> PostAdvertisement(Advertisement? advertisement)
         {
+            //return Ok(advertisement);
             var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             //return Ok(userId);
             // Set the UserId in the Advertisement object
@@ -100,10 +109,6 @@ namespace E_Project.Controllers
             });
         }
 
-        private ActionResult<Advertisement> OK(string? userId)
-        {
-            throw new NotImplementedException();
-        }
 
         // DELETE: api/Advertisements/5
         [HttpDelete("{id}")]

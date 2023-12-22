@@ -1,6 +1,7 @@
 using E_Project.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -79,6 +80,7 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
         };
     });
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Password settings
@@ -107,6 +109,15 @@ builder.Services.AddCors();
 
 
 var app = builder.Build();
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = new FileExtensionContentTypeProvider
+    {
+        Mappings = {
+                [".js"] = "application/javascript",
+            }
+    }
+});
 app.UseCors(); // Place this early in the pipeline
 
 app.UseCors(builder =>

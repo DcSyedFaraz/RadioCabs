@@ -10,7 +10,7 @@ namespace E_Project.Models
         public string? MobileNumber { get; set; }
         public string? Email { get; set; }
         public string? City { get; set; }
-        public FeedbackType Type { get; set; }
+        public string? Type { get; set; }
         public string? Description { get; set; }
     }
 

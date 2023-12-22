@@ -27,7 +27,7 @@ namespace E_Project.Controllers
         [HttpGet("companies")]
         public IActionResult GetCompanies()
         {
-            var companies = _context.Companies.Include(c => c.User).ToList();
+            var companies = _context.Companies.Include(c => c.User).OrderByDescending(c => c.Id).ToList();
             var options = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -63,10 +63,10 @@ namespace E_Project.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existingCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Name == company.Name);
+                var existingCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Email == company.Email);
                 if (existingCompany != null)
                 {
-                    return BadRequest(new { Message = "Company with the same name already exists." });
+                    return BadRequest(new { Message = "Company with the same Email already exists." });
                 }
 
                 _context.Companies.Add(company);

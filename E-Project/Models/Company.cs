@@ -24,9 +24,9 @@ namespace E_Project.Models
     }
     public enum MembershipType
     {
-        Premium,
-        Basic,
-        Free
+        Free = 0,
+        Standard = 1,
+        Premium = 2
     }
 
     public enum PaymentType
