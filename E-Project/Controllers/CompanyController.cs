@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace E_Project.Controllers
 {
-    
+
     [ApiController]
     [Route("api/[controller]")]
     public class CompanyController : Controller
@@ -24,10 +25,90 @@ namespace E_Project.Controllers
 
         }
 
+
+        [HttpGet("search")]
+        public IActionResult Search(string keyword)
+        {
+            var result = new
+            {
+                Drivers = _context.Drivers.Where(d => d.Name.Contains(keyword) && d.Status == "approved").ToList(),
+                Advertisements = _context.Advertisements.Where(a => a.CompanyName.Contains(keyword) && a.Status == "approved").ToList(),
+                Companies = _context.Companies.Where(c => c.Name.Contains(keyword) && c.Status == "approved").ToList()
+            };
+
+            return Ok(result);
+        }
+
+
+
+
+        [HttpGet("approved/{id}")]
+        public IActionResult Approve(int id)
+        {
+            UpdateStatus(id, "approved");
+            return Ok(new { Message = "Company Status approved successfully!" });
+        }
+        [HttpGet("decline/{id}")]
+        public IActionResult Decline(int id)
+        {
+            UpdateStatus(id, "declined");
+
+            return Ok(new { Message = "Company Status declined successfully!" });
+        }
+
+        private void UpdateStatus(int id, string newStatus)
+        {
+            var status = _context.Companies.Find(id);
+
+            if (status != null)
+            {
+                status.Status = newStatus;
+                _context.SaveChanges();
+            }
+        }
+        [HttpGet("request")]
+        public IActionResult request()
+        {
+            var companies = _context.Companies.Where(c => c.Status != "approved").OrderByDescending(c => c.Id).ToList();
+            return Ok(companies);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Company>>> GetCompanyBack()
+        {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (role == "admin")
+            {
+                var company = await _context.Companies.Include(a => a.User).Where(c => c.Status == "approved").OrderByDescending(c => c.Id).ToListAsync();
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                };
+
+                var jsonString = JsonSerializer.Serialize(company, options);
+
+                return Ok(jsonString);
+            }
+            else
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var company = await _context.Companies.Where(d => d.UserId == userId).Include(a => a.User).ToListAsync();
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                };
+
+                var jsonString = JsonSerializer.Serialize(company, options);
+
+                return Ok(jsonString);
+            }
+        }
+
         [HttpGet("companies")]
         public IActionResult GetCompanies()
         {
-            var companies = _context.Companies.Include(c => c.User).OrderByDescending(c => c.Id).ToList();
+            var companies = _context.Companies.Include(c => c.User).Where(c => c.Status == "approved").OrderByDescending(c => c.Id).ToList();
             var options = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -84,7 +165,7 @@ namespace E_Project.Controllers
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(newUser, UserRoles.Company);
-                  
+
 
                     company.UserId = newUser.Id;
                     await _context.SaveChangesAsync();
@@ -142,25 +223,25 @@ namespace E_Project.Controllers
         {
             //try
             //{
-                // Find the company by its Id
-                var company = _context.Companies.Find(companyId);
+            // Find the company by its Id
+            var company = _context.Companies.Find(companyId);
 
-                if (company == null)
-                {
-                    return NotFound(new { Message = "Company not found." });
-                }
+            if (company == null)
+            {
+                return NotFound(new { Message = "Company not found." });
+            }
             var userssid = company.UserId;
 
-                // Remove the company from the database
-                _context.Companies.Remove(company);
-                _context.SaveChanges();
-                if (userssid != null)
-                {
-                    var user = await userManager.FindByIdAsync(userssid);
-                    await userManager.DeleteAsync(user);
-                }
+            // Remove the company from the database
+            _context.Companies.Remove(company);
+            _context.SaveChanges();
+            if (userssid != null)
+            {
+                var user = await userManager.FindByIdAsync(userssid);
+                await userManager.DeleteAsync(user);
+            }
 
-                return Ok(new { Message = "Company deleted successfully!" });
+            return Ok(new { Message = "Company deleted successfully!" });
             //}
             //catch (Exception ex)
             //{

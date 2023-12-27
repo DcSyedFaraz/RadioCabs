@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -52,6 +54,25 @@ namespace E_Project.Controllers
         //{
         //}
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Feedback>> GetFeedback(int id)
+        {
+            var advertisement = await _context.Feedbacks.FirstOrDefaultAsync(a => a.Id == id);
+
+            if (advertisement == null)
+            {
+                return NotFound();
+            }
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            };
+
+            var jsonString = JsonSerializer.Serialize(advertisement, options);
+
+            return Ok(jsonString);
+        }
+
         // DELETE api/<FeedbackController>/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -68,7 +89,7 @@ namespace E_Project.Controllers
             return Ok(new Responce
             {
                 Status = "Success",
-                Message = "Successfully Deleted Advertisement's Data"
+                Message = "Successfully Deleted Feedback's Data"
             });
         }
     }

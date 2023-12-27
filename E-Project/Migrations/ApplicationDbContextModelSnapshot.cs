@@ -54,6 +54,9 @@ namespace E_Project.Migrations
                     b.Property<string>("PaymentType")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Telephone")
                         .HasColumnType("nvarchar(max)");
 
@@ -158,8 +161,8 @@ namespace E_Project.Migrations
                     b.Property<string>("FaxNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MembershipType")
-                        .HasColumnType("int");
+                    b.Property<string>("MembershipType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Mobile")
                         .HasColumnType("nvarchar(max)");
@@ -167,8 +170,11 @@ namespace E_Project.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PaymentType")
-                        .HasColumnType("int");
+                    b.Property<string>("PaymentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Telephone")
                         .HasColumnType("nvarchar(max)");
@@ -215,8 +221,11 @@ namespace E_Project.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PaymentType")
-                        .HasColumnType("int");
+                    b.Property<string>("PaymentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Telephone")
                         .HasColumnType("nvarchar(max)");

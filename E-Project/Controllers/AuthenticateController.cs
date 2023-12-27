@@ -23,6 +23,8 @@ namespace E_Project.Controllers
             this.configuration = configuration;
         }
 
+
+
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)

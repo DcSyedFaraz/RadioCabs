@@ -17,6 +17,7 @@ namespace E_Project.Models
         public string? Email { get; set; }
         public string? Description { get; set; }
         public string? PaymentType { get; set; }
+        public string? Status { get; set; }
 
         [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }
